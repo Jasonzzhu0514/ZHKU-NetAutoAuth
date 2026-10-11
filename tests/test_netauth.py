@@ -1,4 +1,5 @@
 import importlib.util
+import io
 from pathlib import Path
 import sys
 import tempfile
@@ -12,6 +13,12 @@ spec.loader.exec_module(auth)
 
 
 class AuthTests(unittest.TestCase):
+    def setUp(self):
+        self.output = io.StringIO()
+        capture = patch('sys.stdout', self.output)
+        capture.start()
+        self.addCleanup(capture.stop)
+
     def test_deletion_clears_current_legacy_and_temporary_credentials_only(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

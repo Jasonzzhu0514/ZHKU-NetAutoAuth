@@ -18,7 +18,7 @@ import urllib.request
 
 
 CALLBACK = "campusAuth"
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 # Campus infrastructure defaults, not personal device or account information.
 OFFICE_PORTAL = "http://10.255.255.254"
 OFFICE_CONFIG_PORT = 801
@@ -103,7 +103,7 @@ class OfficePortalClient:
         if params is not None:
             url += "?" + urllib.parse.urlencode(params)
         req = urllib.request.Request(url, headers={
-            "User-Agent": "Mozilla/5.0 ZHKU-NetAutoAuth/1.0.0",
+            "User-Agent": f"Mozilla/5.0 ZHKU-NetAutoAuth/{VERSION}",
             "Referer": portal + "/a79.htm",
             "Accept": "*/*",
             "Cache-Control": "no-cache",

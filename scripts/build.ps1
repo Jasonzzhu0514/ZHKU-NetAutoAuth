@@ -9,7 +9,7 @@ try {
     }
     & $buildPython -m pip install -r scripts\requirements-build.txt
     if ($LASTEXITCODE -ne 0) { throw 'Failed to install build dependencies.' }
-    & $buildPython -P -m unittest discover -s tests -v
+    & $buildPython -X utf8 -P -m unittest discover -s tests -v
     if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }
     & $buildPython -m PyInstaller --noconfirm --clean --onefile --console --specpath build --name ZHKU-NetAutoAuth src\netauth.py
     if ($LASTEXITCODE -ne 0) { throw 'Executable build failed.' }
