@@ -1,0 +1,53 @@
+name: Windows release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check tag matches application version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $appVersion = (python -E src/netauth.py --version) -split ' ' | Select-Object -Last 1
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot read application version.' }
+          if ($env:RELEASE_TAG -ne "v$appVersion") { throw 'Tag must match VERSION in src/netauth.py.' }
+      - name: Test and build release package
+        shell: pwsh
+        run: ./scripts/build.ps1
+      - name: Check packaged executable
+        shell: pwsh
+        run: |
+          & ./dist/ZHKU-NetAutoAuth.exe --version
+          if ($LASTEXITCODE -ne 0) { throw 'Executable startup failed.' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Windows-x64
+          path: dist/*.zip
+          if-no-files-found: error
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $packages = @(Get-ChildItem -LiteralPath dist -Filter '*.zip' | ForEach-Object { $_.FullName })
+          & gh release create $env:RELEASE_TAG @packages --verify-tag --title "ZHKU-NetAutoAuth $env:RELEASE_TAG" --generate-notes
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub release publication failed.' }
