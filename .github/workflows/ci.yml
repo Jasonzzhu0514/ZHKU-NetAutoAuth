@@ -1,20 +1,25 @@
-name: Tests
+name: Rust checks
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, 'feat/**']
   pull_request:
 
 permissions:
   contents: read
 
 jobs:
-  test:
+  check:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          python-version: '3.12'
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Check formatting
+        run: cargo fmt --check
+      - name: Check Rust code
+        run: cargo clippy --locked --all-targets -- -D warnings
       - name: Run tests
-        run: python -X utf8 -P -m unittest discover -s tests -v
+        run: cargo test --locked
