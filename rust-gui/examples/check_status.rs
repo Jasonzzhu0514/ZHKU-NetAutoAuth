@@ -2,6 +2,8 @@
 #[allow(dead_code)]
 #[path = "../src/portal.rs"]
 mod portal;
+#[path = "../src/portal_format.rs"]
+mod portal_format;
 
 fn main() {
     match portal::Portal::new() {
