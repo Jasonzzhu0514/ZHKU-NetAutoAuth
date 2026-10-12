@@ -22,7 +22,7 @@ impl App {
                             configured,
                             busy,
                             egui::Button::new(egui::RichText::new("立即认证").color(t::CARD))
-                                .stroke(egui::Stroke::new(1.0, t::BLUE))
+                                .stroke(egui::Stroke::new(1.0_f32, t::BLUE))
                                 .min_size(egui::vec2(button_width, 36.0)),
                         )
                     })

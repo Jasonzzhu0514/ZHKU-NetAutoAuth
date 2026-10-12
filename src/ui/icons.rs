@@ -4,7 +4,7 @@ impl App {
     pub(super) fn network_icon(ui: &egui::Ui, rect: egui::Rect, color: egui::Color32) {
         let painter = ui.painter();
         let center = rect.center();
-        let stroke = egui::Stroke::new(1.5, color);
+        let stroke = egui::Stroke::new(1.5_f32, color);
         let top = center + egui::vec2(0.0, -6.0);
         let left = center + egui::vec2(-8.0, 6.0);
         let right = center + egui::vec2(8.0, 6.0);
@@ -31,10 +31,10 @@ impl App {
             .collect();
         let end = *points.last().expect("arc points");
         ui.painter()
-            .add(egui::Shape::line(points, egui::Stroke::new(1.3, color)));
+            .add(egui::Shape::line(points, egui::Stroke::new(1.3_f32, color)));
         ui.painter().line_segment(
             [end, end + egui::vec2(-4.0, -1.0)],
-            egui::Stroke::new(1.3, color),
+            egui::Stroke::new(1.3_f32, color),
         );
     }
 
@@ -78,7 +78,7 @@ impl App {
             ui.painter().rect_stroke(
                 rect.expand(2.0),
                 12,
-                egui::Stroke::new(1.0, t::BLUE),
+                egui::Stroke::new(1.0_f32, t::BLUE),
                 egui::StrokeKind::Outside,
             );
         }
@@ -94,14 +94,14 @@ impl App {
         ];
         ui.painter().add(egui::Shape::line(
             points,
-            egui::Stroke::new(1.3, ui.visuals().text_color()),
+            egui::Stroke::new(1.3_f32, ui.visuals().text_color()),
         ));
     }
 
     pub(super) fn delete_icon(ui: &mut egui::Ui) -> egui::Response {
         let (rect, response) = ui.allocate_exact_size(egui::vec2(24.0, 24.0), egui::Sense::click());
         let visuals = ui.style().interact(&response);
-        let stroke = egui::Stroke::new(1.3, visuals.fg_stroke.color);
+        let stroke = egui::Stroke::new(1.3_f32, visuals.fg_stroke.color);
         let center = rect.center();
         let painter = ui.painter_at(rect);
         if response.hovered() {
@@ -145,7 +145,7 @@ impl App {
                 center + egui::vec2(-11.0 + 22.0 * t, 6.0 * (std::f32::consts::PI * t).sin()),
             );
         }
-        let stroke = egui::Stroke::new(1.5, visuals.fg_stroke.color);
+        let stroke = egui::Stroke::new(1.5_f32, visuals.fg_stroke.color);
         painter.add(egui::Shape::closed_line(points, stroke));
         painter.circle_stroke(center, 3.0, stroke);
         if visible {

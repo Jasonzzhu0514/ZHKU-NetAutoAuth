@@ -11,7 +11,7 @@
 
 ## 下载与使用
 
-Windows 桌面版从 **v2.0.0** 开始发布。在 [Releases](https://github.com/Jasonzzhu0514/ZHKU-NetAutoAuth/releases) 中选择桌面版本，下载 **ZHKU-NetAutoAuth.exe**，双击即可运行，无需安装 Python 或 Rust。
+Windows 桌面版对应 **v2.x**。在 [Releases](https://github.com/Jasonzzhu0514/ZHKU-NetAutoAuth/releases) 中选择桌面版本，下载 **ZHKU-NetAutoAuth.exe**，双击即可运行，无需安装 Python 或 Rust。
 
 历史 **v1.x** 是命令行版本。如果 Releases 尚无 v2.x，可以按文末的开发说明从源码启动桌面版。GitHub 的“Download ZIP”下载的是源码，普通用户请使用 Release 中的 exe 附件。
 
@@ -90,7 +90,7 @@ cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked
 ```
 
-Windows 发布构建由 CI 执行，也可使用 `./scripts/build.ps1` 在本地构建。发布 tag 必须与 `Cargo.toml` 中的版本一致，例如 `v2.0.0`。Release 直接提供 exe，不额外打包 ZIP。
+Windows 发布构建由 CI 执行，也可使用 `./scripts/build.ps1` 在本地构建。发布 tag 必须与 `Cargo.toml` 中的版本一致，例如 `v2.0.1`。Release 直接提供 exe，不额外打包 ZIP。
 
 ## 历史版本
 

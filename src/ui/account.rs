@@ -76,7 +76,7 @@ impl App {
                         ui.painter().rect_stroke(
                             field.response.rect,
                             6,
-                            egui::Stroke::new(1.0, t::BLUE),
+                            egui::Stroke::new(1.0_f32, t::BLUE),
                             egui::StrokeKind::Inside,
                         );
                     }
@@ -123,7 +123,7 @@ impl App {
                         ui.painter().rect_stroke(
                             field.response.rect,
                             6,
-                            egui::Stroke::new(1.0, t::BLUE),
+                            egui::Stroke::new(1.0_f32, t::BLUE),
                             egui::StrokeKind::Inside,
                         );
                     }

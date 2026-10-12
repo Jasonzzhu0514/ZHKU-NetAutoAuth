@@ -1,6 +1,6 @@
 [package]
 name = "zhku-netautoauth-gui"
-version = "2.0.0"
+version = "2.0.1"
 edition = "2024"
 description = "白云校区校园网自动认证 Windows 桌面客户端"
 publish = false

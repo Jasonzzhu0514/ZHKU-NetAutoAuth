@@ -18,7 +18,7 @@ impl App {
                                     "     刷新状态"
                                 })
                                 .fill(t::CARD)
-                                .stroke(egui::Stroke::new(1.0, t::BORDER)),
+                                .stroke(egui::Stroke::new(1.0_f32, t::BORDER)),
                             )
                         })
                         .inner;

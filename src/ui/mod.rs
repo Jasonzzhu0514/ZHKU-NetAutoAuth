@@ -88,7 +88,7 @@ impl App {
         let width = ui.available_width();
         egui::Frame::new()
             .fill(t::CARD)
-            .stroke(egui::Stroke::new(1.0, t::BORDER))
+            .stroke(egui::Stroke::new(1.0_f32, t::BORDER))
             .corner_radius(8)
             .inner_margin(t::CARD_PADDING)
             .show(ui, |ui| {
@@ -101,7 +101,7 @@ impl App {
     pub(super) fn input_frame() -> egui::Frame {
         egui::Frame::new()
             .fill(t::INPUT)
-            .stroke(egui::Stroke::new(1.0, t::BORDER))
+            .stroke(egui::Stroke::new(1.0_f32, t::BORDER))
             .corner_radius(6)
             .inner_margin(egui::Margin::symmetric(10, 4))
     }

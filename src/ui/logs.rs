@@ -100,7 +100,7 @@ impl App {
         let width = ui.available_width();
         egui::Frame::new()
             .fill(t::CARD)
-            .stroke(egui::Stroke::new(1.0, t::BORDER))
+            .stroke(egui::Stroke::new(1.0_f32, t::BORDER))
             .corner_radius(8)
             .show(ui, |ui| {
                 ui.set_width(width - 2.0);

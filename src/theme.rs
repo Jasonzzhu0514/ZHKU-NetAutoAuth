@@ -38,21 +38,21 @@ pub fn configure(ctx: &egui::Context) {
     style.visuals.override_text_color = Some(TEXT);
     style.visuals.panel_fill = BACKGROUND;
     style.visuals.window_shadow = egui::epaint::Shadow::NONE;
-    style.visuals.widgets.noninteractive.bg_stroke = egui::Stroke::new(1.0, DIVIDER);
+    style.visuals.widgets.noninteractive.bg_stroke = egui::Stroke::new(1.0_f32, DIVIDER);
     for widget in [
         &mut style.visuals.widgets.inactive,
         &mut style.visuals.widgets.hovered,
         &mut style.visuals.widgets.active,
     ] {
         widget.corner_radius = egui::CornerRadius::same(6);
-        widget.fg_stroke = egui::Stroke::new(1.0, TEXT);
-        widget.bg_stroke = egui::Stroke::new(1.0, BORDER);
+        widget.fg_stroke = egui::Stroke::new(1.0_f32, TEXT);
+        widget.bg_stroke = egui::Stroke::new(1.0_f32, BORDER);
     }
     style.visuals.widgets.inactive.weak_bg_fill = CARD;
     style.visuals.widgets.hovered.weak_bg_fill = egui::Color32::from_rgb(240, 246, 255);
-    style.visuals.widgets.hovered.bg_stroke = egui::Stroke::new(1.0, BLUE);
+    style.visuals.widgets.hovered.bg_stroke = egui::Stroke::new(1.0_f32, BLUE);
     style.visuals.widgets.active.weak_bg_fill = egui::Color32::from_rgb(225, 236, 252);
-    style.visuals.widgets.active.bg_stroke = egui::Stroke::new(1.0, BLUE);
+    style.visuals.widgets.active.bg_stroke = egui::Stroke::new(1.0_f32, BLUE);
     style.visuals.selection.bg_fill = BLUE;
     ctx.set_style(style);
 }
