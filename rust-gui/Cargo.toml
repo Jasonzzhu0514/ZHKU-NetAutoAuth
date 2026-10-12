@@ -1,0 +1,17 @@
+[package]
+name = "zhku-netautoauth-gui"
+version = "0.1.0"
+edition = "2024"
+description = "白云校区校园网自动认证 Windows 桌面客户端"
+publish = false
+
+[dependencies]
+eframe = "0.31"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls", "gzip", "charset"] }
+serde_json = "1"
+regex = "1"
+zeroize = "1"
+tempfile = "3"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security_Cryptography"] }
