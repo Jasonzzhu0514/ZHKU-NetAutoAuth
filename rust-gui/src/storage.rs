@@ -33,15 +33,9 @@ impl Settings {
 }
 
 pub fn path() -> Result<PathBuf, String> {
-    std::env::var_os("LOCALAPPDATA")
-        .filter(|s| !s.is_empty())
-        .map(|p| {
-            PathBuf::from(p)
-                .join("ZHKU-NetAutoAuth")
-                .join("rust-gui")
-                .join("credentials.dat")
-        })
-        .ok_or_else(|| "无法确定 Windows 本地应用数据目录，凭据未保存".into())
+    crate::paths::app_data()
+        .map(|directory| directory.join("credentials.dat"))
+        .map_err(|error| format!("{error}，凭据未保存"))
 }
 
 #[cfg(windows)]

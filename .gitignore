@@ -13,3 +13,4 @@ dist/
 .env.*
 target/
 *.pdb
+desktop.json

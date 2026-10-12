@@ -32,6 +32,7 @@ struct Event {
 }
 
 pub(crate) struct App {
+    desktop: crate::desktop::Desktop,
     username: String,
     saved_username: Option<String>,
     password: Zeroizing<String>,
@@ -57,6 +58,9 @@ impl App {
     pub(crate) fn new(cc: &eframe::CreationContext<'_>) -> Self {
         Self::configure_context(&cc.egui_ctx);
         let mut app = Self::empty();
+        for error in app.desktop.initialize(cc) {
+            app.log_entry(error, true);
+        }
         match storage::path().and_then(|file| storage::load(&file)) {
             Ok(settings) => {
                 if !settings.username.is_empty() {
@@ -85,6 +89,7 @@ impl App {
 
     fn empty() -> Self {
         Self {
+            desktop: crate::desktop::Desktop::default(),
             username: String::new(),
             saved_username: None,
             password: Zeroizing::new(String::new()),
@@ -284,11 +289,17 @@ impl App {
 
 impl eframe::App for App {
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+        self.desktop.shutdown();
         if self.settings_dirty {
             self.persist_settings();
         }
     }
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        if self.desktop.update(ctx, &self.status, self.guard) {
+            self.guard = false;
+            self.guard_pending = false;
+            return;
+        }
         self.drain_traces();
         let received = self.receiver.as_ref().map(|r| r.try_recv());
         match received {
@@ -323,6 +334,11 @@ impl eframe::App for App {
             self.launch(Action::Guard, ctx);
         }
         ctx.request_repaint_after(Duration::from_secs(1));
-        self.draw(ctx);
+        if self.desktop.is_hidden() {
+            self.show_password = false;
+        } else {
+            self.draw(ctx);
+            self.desktop.ui(ctx);
+        }
     }
 }

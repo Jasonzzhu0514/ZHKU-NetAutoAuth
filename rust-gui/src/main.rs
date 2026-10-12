@@ -1,6 +1,8 @@
 #![windows_subsystem = "windows"]
 
 mod app;
+mod desktop;
+mod paths;
 mod portal;
 mod portal_format;
 mod storage;

@@ -24,7 +24,7 @@ impl App {
                     .id_salt("page-scroll")
                     .auto_shrink([false, false])
                     .show(ui, |ui| {
-                        ui.vertical(|ui| {
+                        ui.horizontal(|ui| {
                             ui.spacing_mut().item_spacing.y = 6.0;
                             ui.label(
                                 egui::RichText::new("校园网自动认证")
@@ -32,6 +32,14 @@ impl App {
                                     .font(t::heading_font(22.0))
                                     .strong()
                                     .color(t::TEXT),
+                            );
+                            ui.with_layout(
+                                egui::Layout::right_to_left(egui::Align::Center),
+                                |ui| {
+                                    if ui.add(egui::Button::new("设置").frame(false)).clicked() {
+                                        self.desktop.open_settings();
+                                    }
+                                },
                             );
                         });
                         ui.add_space(8.0);
