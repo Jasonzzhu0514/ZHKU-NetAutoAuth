@@ -11,7 +11,7 @@
 
 ## 快速开始
 
-版本发布后，在本仓库的 **Releases** 页面下载附件中的 **ZHKU-NetAutoAuth-v版本号-windows-x64.zip**，解压后双击 **ZHKU-NetAutoAuth.exe**。无需安装 Python，也无需安装其他依赖。
+在本仓库的 **Releases** 页面下载附件中的 **ZHKU-NetAutoAuth.exe**，双击即可运行。无需解压，也无需安装 Python 或其他依赖。
 
 使用前，请先通过网线或 Wi-Fi 接入校园网。程序打开后会显示所在区域。
 
@@ -53,7 +53,7 @@
 
 **没有安装 Python，能用吗？**
 
-可以，下载 exe 发布包即可。GitHub 的“Download ZIP”下载的是源码，普通用户请使用 Releases 中的 Windows 发布包。
+可以，在 Releases 中下载 **ZHKU-NetAutoAuth.exe** 即可。GitHub 的“Download ZIP”下载的是源码，普通用户请使用 Releases 中的 exe 附件。
 
 **为什么显示“未检测到校园网”？**
 
