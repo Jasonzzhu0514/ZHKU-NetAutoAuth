@@ -19,6 +19,30 @@ test('打开认证页面期间不显示刷新动画，也不发送状态检查',
   await expect.poll(() => desktopCalls(page)).toContain('check');
 });
 
+test('关于显示运行版本及许可证，项目链接由桌面接口打开', async ({ page }) => {
+  await mockDesktop(page, 'startup-race');
+  await page.goto('/');
+  await expect.poll(() => desktopCalls(page)).toContain('ready');
+  await page.getByRole('button', { name: '设置', exact: true }).click();
+  const about = page.locator('.about-card');
+  await expect(about.getByText('v2.1.0 · 便携版', { exact: true })).toBeVisible();
+  await expect(about.getByText('许可证：MIT', { exact: true })).toBeVisible();
+  await about.getByRole('button', { name: '许可证：MIT', exact: true }).click();
+  const licenseDialog = page.getByRole('dialog', { name: 'MIT 许可证', exact: true });
+  const licenseText = licenseDialog.locator('.license-text');
+  await expect(licenseText).toContainText('Copyright (c) 2026 Jasonzzhu0514');
+  await expect(licenseText).toContainText('Permission is hereby granted, free of charge');
+  await expect(licenseText).toContainText('The above copyright notice and this permission notice shall be included');
+  await expect(licenseText).toContainText('THE SOFTWARE IS PROVIDED "AS IS"');
+  await expect(licenseText).toContainText('OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.');
+  await licenseDialog.getByRole('button', { name: '关闭', exact: true }).click();
+  await expect(licenseDialog).toBeHidden();
+  await about.getByRole('button', { name: '项目主页', exact: true }).click();
+  await expect.poll(() => desktopCalls(page)).toContain('project:home');
+  await about.getByRole('button', { name: '反馈问题', exact: true }).click();
+  await expect.poll(() => desktopCalls(page)).toContain('project:issues');
+});
+
 test('初始化期间收到完成事件，不被旧 busy 快照覆盖', async ({ page }) => {
   await mockDesktop(page, 'startup-race');
   await page.goto('/');
@@ -30,7 +54,7 @@ test('初始化期间收到完成事件，不被旧 busy 快照覆盖', async ({
   await page.getByRole('button', { name: '认证页面', exact: true }).click();
   await expect.poll(() => desktopCalls(page)).toContain('open-auth-page');
   await page.getByRole('button', { name: '设置', exact: true }).click();
-  await expect(page.getByText('检查已完成', { exact: true })).toBeVisible();
+  await expect(page.getByText('检查已完成', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: '主页', exact: true }).click();
   await page.getByRole('button', { name: '刷新状态' }).click();
   await expect.poll(() => desktopCalls(page)).toContain('check');

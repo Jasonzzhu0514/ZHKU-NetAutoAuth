@@ -59,6 +59,7 @@ fn main() {
             commands::install_update,
             commands::open_release_page,
             commands::open_authentication_page,
+            commands::open_project_page,
             commands::frontend_ready,
             commands::close_window,
         ])

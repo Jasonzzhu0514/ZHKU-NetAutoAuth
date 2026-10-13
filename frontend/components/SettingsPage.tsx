@@ -4,6 +4,7 @@ import { ArrowDownloadRegular, ArrowSyncRegular, OpenRegular } from '@fluentui/r
 import { useState } from 'react';
 import type { Desktop } from '../useDesktop';
 import { GuardIntervalSetting } from './GuardIntervalSetting';
+import { AboutCard } from './AboutCard';
 
 export function SettingsPage({ desktop }: { desktop: Desktop }) {
   const [confirm, setConfirm] = useState(false);
@@ -19,10 +20,11 @@ export function SettingsPage({ desktop }: { desktop: Desktop }) {
           <Divider />
           <GuardIntervalSetting desktop={desktop} />
           <Divider />
-          <section className="updates-section"><div className="section-heading"><h4>软件更新</h4><span className="version-tag">v{update?.version || '—'} · {update?.edition || '—'}</span></div>
+          <section className="updates-section"><div className="section-heading"><h4>软件更新</h4></div>
             <Checkbox label="认证联网后自动检查更新" checked={preferences?.autoCheckUpdates || false}
               onChange={(_, data) => { void desktop.preferences({ autoCheckUpdates: !!data.checked }); }} />
-            <p className={`update-message ${update?.failed ? 'error-text' : ''}`}>{update?.message || '正在读取更新状态'}</p>
+            {(update?.busy || update?.failed || update?.release || update?.rollback) &&
+              <p className={`update-message ${update.failed ? 'error-text' : ''}`}>{update.message}</p>}
             {update?.downloading && <div className="download-progress"><ProgressBar value={update.bytes} max={update.release?.size || 1} />
               <span>{Math.min(100, Math.floor(update.bytes / (update.release?.size || 1) * 100))}%</span></div>}
             <div className="update-actions"><Button icon={<ArrowSyncRegular />} disabled={!desktop.ready || update?.busy || desktop.executing}
@@ -37,6 +39,7 @@ export function SettingsPage({ desktop }: { desktop: Desktop }) {
             {update?.release && <div className="release-notes"><strong>v{update.release.version} 更新说明</strong><p>{update.release.notes}</p></div>}
           </section>
     </div></Card>
+    <AboutCard desktop={desktop} />
     <Dialog open={confirm} onOpenChange={(_, data) => setConfirm(data.open)}><DialogSurface><DialogBody>
       <DialogTitle>安装更新并重启？</DialogTitle><DialogContent>升级期间会暂时停止守护，不会注销校园网。现有配置会保留，未记住的密码需要重新输入。</DialogContent>
       <DialogActions><Button onClick={() => setConfirm(false)}>取消</Button><Button appearance="primary" onClick={() => { setConfirm(false); void desktop.install(); }}>确认安装</Button></DialogActions>

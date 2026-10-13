@@ -188,6 +188,14 @@ pub fn frontend_ready() {
 }
 
 #[tauri::command]
+pub fn open_project_page(app: AppHandle, target: &str) -> Result<(), String> {
+    let url = zhku_netautoauth_gui::updater::project_page(target)?;
+    app.opener()
+        .open_url(url, None::<&str>)
+        .map_err(|_| "无法打开项目页面，请检查默认浏览器".into())
+}
+
+#[tauri::command]
 pub fn close_window(app: AppHandle, state: State<'_, DesktopState>) -> Result<(), String> {
     let client = state.client.lock().map_err(|_| "客户端状态暂不可用")?;
     if client.notice_pending() && state.tray_ready.load(Ordering::Relaxed) {

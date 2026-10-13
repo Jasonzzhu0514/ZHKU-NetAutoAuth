@@ -2,6 +2,7 @@
 name = "zhku-netautoauth-desktop"
 version = "2.2.1"
 edition = "2024"
+license = "MIT"
 description = "ZHKU-NetAutoAuth Fluent UI 桌面客户端"
 publish = false
 

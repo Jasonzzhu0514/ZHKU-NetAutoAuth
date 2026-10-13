@@ -98,6 +98,7 @@ export async function mockDesktop(page: Page, mode: 'startup-race' | 'save-failu
             });
             return;
           }
+          if (command === 'open_project_page') { calls.push(`project:${args.target}`); return; }
           if (command === 'get_logs') return logs.filter((log) => log.id > args.after).slice(0, 256);
           return;
         },

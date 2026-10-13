@@ -303,3 +303,27 @@ pub fn resume_requested() -> bool {
 pub fn confirm_startup() {
     install::confirm_startup();
 }
+
+pub fn project_page(target: &str) -> Result<String, String> {
+    let project = format!("https://github.com/{}", releases::REPOSITORY);
+    match target {
+        "home" => Ok(project),
+        "issues" => Ok(format!("{project}/issues")),
+        _ => Err("不支持的项目页面".into()),
+    }
+}
+
+#[cfg(test)]
+mod project_page_tests {
+    use super::*;
+
+    #[test]
+    fn project_links_are_limited_to_known_repository_pages() {
+        let home = format!("https://github.com/{}", releases::REPOSITORY);
+        assert_eq!(project_page("home").unwrap(), home);
+        assert_eq!(project_page("issues").unwrap(), format!("{home}/issues"));
+        for invalid in ["", "https://example.com", "../settings"] {
+            assert!(project_page(invalid).is_err());
+        }
+    }
+}
