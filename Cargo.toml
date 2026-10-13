@@ -1,6 +1,6 @@
 [package]
 name = "zhku-netautoauth-gui"
-version = "2.2.1"
+version = "2.3.0"
 edition = "2024"
 license = "MIT"
 description = "白云校区校园网自动认证 Windows 桌面客户端"
