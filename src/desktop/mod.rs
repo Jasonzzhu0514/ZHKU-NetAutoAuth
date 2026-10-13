@@ -34,7 +34,7 @@ pub(crate) struct Desktop {
 impl Desktop {
     pub fn initialize(&mut self, cc: &eframe::CreationContext<'_>) -> Vec<String> {
         let mut errors = Vec::new();
-        match crate::paths::app_data().map(|directory| directory.join("desktop.json")) {
+        match crate::paths::desktop_preferences() {
             Ok(file) => {
                 match Preferences::load(&file) {
                     Ok(prefs) => self.preferences = prefs,

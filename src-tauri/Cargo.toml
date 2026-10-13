@@ -1,6 +1,6 @@
 [package]
 name = "zhku-netautoauth-desktop"
-version = "2.2.0"
+version = "2.2.1"
 edition = "2024"
 description = "ZHKU-NetAutoAuth Fluent UI 桌面客户端"
 publish = false

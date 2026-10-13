@@ -75,6 +75,7 @@ impl Preferences {
         temporary
             .persist(file)
             .map_err(|_| "无法替换窗口行为设置")?;
+        crate::paths::sync_legacy_configuration(file, data.to_string().as_bytes())?;
         Ok(())
     }
 }

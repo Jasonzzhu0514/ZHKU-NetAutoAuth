@@ -68,7 +68,7 @@ Windows 桌面版对应 **v2.x**。在 [Releases](https://github.com/Jasonzzhu05
 
 更新包来自本仓库的 GitHub Releases，经过 SHA-256 完整性校验。网络受限、缺少校验信息或程序目录不可写时，可打开发布页面手动下载。安装包暂未配置 Windows 代码签名。
 
-v2.0.x 没有内置更新功能，需要手动安装或下载一次 v2.1.0，之后才能使用软件内更新。卸载安装版会保留账号和窗口设置；需要清除凭据时，请先在客户端删除保存的账号。
+v2.0.x 没有内置更新功能，需要手动安装或下载一次 v2.1.0，之后才能使用软件内更新。卸载安装版默认保留账号和窗口设置；如需清除，可以在卸载向导中勾选「同时删除账号与设置」。安装版和便携版共用配置，删除后便携版也需要重新配置。静默卸载默认保留配置。
 
 ## 隐私
 
@@ -111,7 +111,7 @@ cargo fmt --manifest-path src-tauri/Cargo.toml --check
 cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings
 ```
 
-`npm run desktop:build` 构建 Tauri 客户端。前端源代码位于 `frontend/`，桌面接口与托盘位于 `src-tauri/`，共用 Rust 核心位于 `src/`。账号仍使用原有 DPAPI 凭据文件，前端不使用浏览器本地存储保存密码。
+`npm run desktop:build` 构建 Tauri 客户端。前端源代码位于 `frontend/`，桌面接口与托盘位于 `src-tauri/`，共用 Rust 核心位于 `src/`。凭据与窗口设置位于 `%LOCALAPPDATA%\ZHKU-NetAutoAuth\`，旧目录中的配置会自动迁移，已有新配置不会被覆盖。旧副本保留用于版本回退，删除凭据时会一并清理。凭据继续使用 DPAPI 加密，前端不使用浏览器本地存储保存密码。
 
 v2.2.0 起，正式发布流程构建 Tauri 客户端，提供安装包和便携版两个 exe，不额外打包 ZIP。旧 egui 入口暂留在源码中作为回归基线。
 

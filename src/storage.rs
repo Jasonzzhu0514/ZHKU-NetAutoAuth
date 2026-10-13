@@ -33,9 +33,7 @@ impl Settings {
 }
 
 pub fn path() -> Result<PathBuf, String> {
-    crate::paths::app_data()
-        .map(|directory| directory.join("credentials.dat"))
-        .map_err(|error| format!("{error}，凭据未保存"))
+    crate::paths::credentials().map_err(|error| format!("{error}，凭据未保存"))
 }
 
 #[cfg(windows)]
@@ -174,20 +172,45 @@ pub fn save(file: &Path, settings: &Settings) -> Result<(), String> {
         .and_then(|_| temp.as_file().sync_all())
         .map_err(|_| "无法写入加密凭据")?;
     temp.persist(file).map_err(|_| "无法替换加密凭据文件")?;
+    crate::paths::sync_legacy_configuration(file, &encrypted)?;
     Ok(())
 }
 
 pub fn delete(file: &Path) -> Result<(), String> {
-    match std::fs::remove_file(file) {
-        Ok(()) => Ok(()),
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
-        Err(_) => Err("无法删除保存的凭据，请检查文件权限".into()),
+    let legacy = crate::paths::legacy_credentials(file);
+    delete_with_legacy(file, legacy.as_deref())
+}
+
+fn delete_with_legacy(file: &Path, legacy: Option<&Path>) -> Result<(), String> {
+    // Remove legacy credentials first so a failed deletion cannot resurrect them.
+    for path in legacy.into_iter().chain(std::iter::once(file)) {
+        match std::fs::remove_file(path) {
+            Ok(()) => {}
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => return Err("无法删除保存的凭据，请检查文件权限".into()),
+        }
     }
+    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn deleting_credentials_also_removes_legacy_copy_without_touching_settings() {
+        let dir = tempfile::tempdir().unwrap();
+        let current = dir.path().join("credentials.dat");
+        let legacy = dir.path().join("old-credentials.dat");
+        let settings = dir.path().join("desktop.json");
+        std::fs::write(&current, b"test-encrypted-current").unwrap();
+        std::fs::write(&legacy, b"test-encrypted-legacy").unwrap();
+        std::fs::write(&settings, b"keep").unwrap();
+        delete_with_legacy(&current, Some(&legacy)).unwrap();
+        assert!(!current.exists());
+        assert!(!legacy.exists());
+        assert_eq!(std::fs::read(settings).unwrap(), b"keep");
+        delete_with_legacy(&current, Some(&legacy)).unwrap();
+    }
     #[test]
     fn invalid_or_oversized_credentials_are_rejected() {
         let dir = tempfile::tempdir().unwrap();

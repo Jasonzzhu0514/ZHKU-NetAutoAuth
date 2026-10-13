@@ -77,8 +77,7 @@ impl Client {
             }
             Err(error) => self.log(error, true),
         }
-        match crate::paths::app_data()
-            .map(|path| path.join("desktop.json"))
+        match crate::paths::desktop_preferences()
             .and_then(|path| preferences::Preferences::load(&path))
         {
             Ok(preferences) => self.preferences = preferences,

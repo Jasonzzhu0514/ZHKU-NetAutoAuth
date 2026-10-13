@@ -1,4 +1,4 @@
-param([string]$ReleaseTag = '', [string]$NsisCompiler = 'makensis.exe')
+param([string]$ReleaseTag = '', [string]$NsisCompiler = 'makensis.exe', [switch]$SkipDependencyInstall)
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
@@ -20,8 +20,10 @@ try {
     if (@($desktop).Count -ne 1 -or $desktop.version -ne $appVersion -or $frontend.version -ne $appVersion -or $tauriConfig.version -ne $appVersion) {
         throw 'Core, Tauri, frontend and window versions must match.'
     }
-    & npm.cmd ci
-    if ($LASTEXITCODE -ne 0) { throw 'Frontend dependency installation failed.' }
+    if (-not $SkipDependencyInstall) {
+        & npm.cmd ci --no-audit --no-fund
+        if ($LASTEXITCODE -ne 0) { throw 'Frontend dependency installation failed.' }
+    }
     & npm.cmd run test:ui
     if ($LASTEXITCODE -ne 0) { throw 'Frontend build or tests failed.' }
 
@@ -50,6 +52,7 @@ try {
     & $NsisCompiler /INPUTCHARSET UTF8 /WX "/DAPP_VERSION=$appVersion" "/DAPP_EXE=$executable" "/DOUT_FILE=$installerOutput" installer/windows.nsi
     if ($LASTEXITCODE -ne 0) { throw 'Installer build failed.' }
     if (-not (Test-Path -LiteralPath $installerOutput)) { throw 'Installer is missing.' }
+    & (Join-Path $PSScriptRoot 'test-installer.ps1') -PayloadExe $executable -NsisCompiler $NsisCompiler
     Write-Host "Built dist\ZHKU-NetAutoAuth-Setup.exe ($appVersion)"
 } finally {
     Pop-Location

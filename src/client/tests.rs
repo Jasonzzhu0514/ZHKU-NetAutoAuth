@@ -112,7 +112,14 @@ fn paged_logs_preserve_raw_messages_and_clear_invalidates_old_history() {
 #[test]
 fn worker_completion_preserves_traces_and_backoff_without_network_requests() {
     let mut client = Client::default();
-    for seconds in [20, 40, 80, 160, 300, 300] {
+    for (failed, seconds) in [
+        (false, 30),
+        (true, 60),
+        (true, 120),
+        (true, 240),
+        (true, 300),
+        (true, 300),
+    ] {
         let (sender, receiver) = mpsc::channel();
         let (trace_sender, traces) = mpsc::channel();
         client.receiver = Some(receiver);
@@ -121,14 +128,21 @@ fn worker_completion_preserves_traces_and_backoff_without_network_requests() {
             .send(portal::Trace {
                 at: Instant::now(),
                 message: "raw trace".into(),
-                failed: true,
+                failed,
             })
             .unwrap();
         sender
             .send(NetworkEvent {
-                status: portal::Status::unknown("未检测到", "timeout"),
-                message: "timeout".into(),
-                failed: true,
+                status: if failed {
+                    portal::Status::unknown("未检测到", "timeout")
+                } else {
+                    portal::Status {
+                        state: portal::State::Online,
+                        ..portal::Status::unknown("测试区域", "")
+                    }
+                },
+                message: if failed { "timeout" } else { "已通过认证" }.into(),
+                failed,
             })
             .unwrap();
         client.tick();
