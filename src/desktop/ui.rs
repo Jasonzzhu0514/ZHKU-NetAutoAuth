@@ -2,15 +2,15 @@ use super::*;
 use crate::theme;
 
 impl Desktop {
-    pub fn ui(&mut self, ctx: &egui::Context) {
+    pub fn ui(&mut self, ctx: &egui::Context, updater: &mut crate::updates::Updater) {
         if self.show_settings {
             let mut open = true;
-            egui::Window::new("窗口设置")
+            egui::Window::new("设置")
                 .id(egui::Id::new("desktop-settings"))
                 .open(&mut open)
                 .collapsible(false)
                 .resizable(false)
-                .default_width(350.0)
+                .default_width(420.0)
                 .show(ctx, |ui| {
                     ui.label(egui::RichText::new("关闭窗口时").strong());
                     let before = self.preferences.close;
@@ -21,6 +21,9 @@ impl Desktop {
                     ).size(12.0).color(theme::SECONDARY));
                     if before != self.preferences.close { self.save(); }
                     self.save_error(ui);
+                    ui.separator();
+                    if ui.checkbox(&mut self.preferences.auto_check_updates,"认证联网后自动检查更新").changed() {self.save();}
+                    updater.ui(ui);
                 });
             self.show_settings = open;
         }

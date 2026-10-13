@@ -1,4 +1,4 @@
-param([string]$ReleaseTag = '')
+param([string]$ReleaseTag = '', [string]$NsisCompiler = 'makensis.exe')
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
@@ -29,6 +29,11 @@ try {
     New-Item -ItemType Directory -Path 'dist' -Force | Out-Null
     Copy-Item -LiteralPath $executable -Destination 'dist\ZHKU-NetAutoAuth.exe' -Force
     Write-Host "Built dist\ZHKU-NetAutoAuth.exe ($appVersion)"
+    $installerOutput = Join-Path $projectRoot 'dist\ZHKU-NetAutoAuth-Setup.exe'
+    & $NsisCompiler /INPUTCHARSET UTF8 /WX "/DAPP_VERSION=$appVersion" "/DAPP_EXE=$executable" "/DOUT_FILE=$installerOutput" installer/windows.nsi
+    if ($LASTEXITCODE -ne 0) { throw 'Installer build failed.' }
+    if (-not (Test-Path -LiteralPath $installerOutput)) { throw 'Installer is missing.' }
+    Write-Host "Built dist\ZHKU-NetAutoAuth-Setup.exe ($appVersion)"
 } finally {
     Pop-Location
 }

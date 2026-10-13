@@ -73,6 +73,12 @@ impl Desktop {
     pub fn open_settings(&mut self) {
         self.show_settings = true;
     }
+    pub fn auto_check_updates(&self) -> bool {
+        self.preferences.auto_check_updates
+    }
+    pub fn exit(&mut self, ctx: &egui::Context) {
+        self.command(Command::Exit, ctx);
+    }
 
     fn save(&mut self) {
         self.save_error = match &self.file {

@@ -33,6 +33,8 @@ struct Event {
 
 pub(crate) struct App {
     desktop: crate::desktop::Desktop,
+    updater: crate::updates::Updater,
+    startup_confirmed: bool,
     username: String,
     saved_username: Option<String>,
     password: Zeroizing<String>,
@@ -58,8 +60,12 @@ impl App {
     pub(crate) fn new(cc: &eframe::CreationContext<'_>) -> Self {
         Self::configure_context(&cc.egui_ctx);
         let mut app = Self::empty();
+        app.updater.initialize();
         for error in app.desktop.initialize(cc) {
             app.log_entry(error, true);
+        }
+        if crate::updates::install::failure_reported() {
+            app.desktop.open_settings();
         }
         match storage::path().and_then(|file| storage::load(&file)) {
             Ok(settings) => {
@@ -73,9 +79,17 @@ impl App {
             }
             Err(error) => app.log_entry(error, true),
         }
-        if app.auto_login {
+        if app.auto_login
+            || (crate::updates::install::resume_requested()
+                && !app.username.trim().is_empty()
+                && !app.password.is_empty())
+        {
             app.guard = true;
-            app.log("已开启启动自动登录和守护");
+            app.log(if app.auto_login {
+                "已开启启动自动登录和守护"
+            } else {
+                "更新后已恢复自动守护"
+            });
             app.launch(Action::Guard, &cc.egui_ctx);
         } else {
             app.launch(Action::Check, &cc.egui_ctx);
@@ -90,6 +104,8 @@ impl App {
     fn empty() -> Self {
         Self {
             desktop: crate::desktop::Desktop::default(),
+            updater: crate::updates::Updater::default(),
+            startup_confirmed: false,
             username: String::new(),
             saved_username: None,
             password: Zeroizing::new(String::new()),
@@ -295,6 +311,29 @@ impl eframe::App for App {
         }
     }
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.updater.poll();
+        if self.updater.settings_requested() {
+            self.desktop.open_settings();
+        }
+        if self.updater.install_requested() {
+            if self.settings_dirty {
+                self.persist_settings();
+            }
+            if self.settings_dirty {
+                self.updater
+                    .installation_error("账号设置未能保存，已暂停安装。请查看运行日志后重试。");
+            } else if self.updater.install(self.guard && self.remember_password) {
+                self.desktop.exit(ctx);
+                self.guard = false;
+                self.guard_pending = false;
+                return;
+            }
+        }
+        self.updater.automatic_check(
+            ctx,
+            self.desktop.auto_check_updates(),
+            self.status.state == State::Online,
+        );
         if self.desktop.update(ctx, &self.status, self.guard) {
             self.guard = false;
             self.guard_pending = false;
@@ -338,7 +377,12 @@ impl eframe::App for App {
             self.show_password = false;
         } else {
             self.draw(ctx);
-            self.desktop.ui(ctx);
+            self.updater.notice(ctx);
+            self.desktop.ui(ctx, &mut self.updater);
+        }
+        if !self.startup_confirmed {
+            crate::updates::install::confirm_startup();
+            self.startup_confirmed = true;
         }
     }
 }
