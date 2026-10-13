@@ -118,6 +118,50 @@ fn interval_change_persists_and_reschedules_without_interrupting_request() {
 }
 
 #[test]
+fn last_check_changes_only_when_network_task_completes_and_includes_failed_checks() {
+    let mut client = Client::default();
+    assert!(client.snapshot().last_checked_ms.is_none());
+    let (sender, receiver) = mpsc::channel();
+    client.receiver = Some(receiver);
+    client.log("unrelated log", false);
+    client.tick();
+    assert!(client.snapshot().last_checked_ms.is_none());
+    let before = timestamp_ms(SystemTime::now());
+    sender
+        .send(NetworkEvent {
+            status: portal::Status::unknown("办公区", "timeout"),
+            message: "timeout".into(),
+            failed: true,
+        })
+        .unwrap();
+    client.tick();
+    let after = timestamp_ms(SystemTime::now());
+    let checked = client.snapshot().last_checked_ms.unwrap();
+    assert!((before..=after).contains(&checked));
+    client.clear_logs();
+    assert_eq!(client.snapshot().last_checked_ms, Some(checked));
+}
+
+#[test]
+fn auth_page_uses_known_region_only_and_contains_no_credentials() {
+    let mut client = configured();
+    assert!(client.authentication_page().is_none());
+    for (region, expected) in [
+        (
+            "办公区",
+            format!("{}{}", portal::OFFICE, portal::OFFICE_PAGE),
+        ),
+        ("宿舍区", portal::DORMITORY.to_owned()),
+    ] {
+        client.status.region = region;
+        let url = client.authentication_page().unwrap();
+        assert_eq!(url, expected);
+        assert!(!url.contains("test-account"));
+        assert!(!url.contains("test-only-secret"));
+    }
+}
+
+#[test]
 fn locked_accounts_cannot_delete_or_replace_saved_credentials() {
     let mut client = configured();
     client.guard = true;
@@ -157,6 +201,7 @@ fn paged_logs_preserve_raw_messages_and_clear_invalidates_old_history() {
 #[test]
 fn worker_completion_preserves_traces_and_backoff_without_network_requests() {
     let mut client = Client::default();
+    let recorded_at = UNIX_EPOCH + Duration::from_secs(1_700_000_000);
     for (failed, seconds) in [
         (false, 30),
         (true, 60),
@@ -171,7 +216,7 @@ fn worker_completion_preserves_traces_and_backoff_without_network_requests() {
         client.trace_receiver = Some(traces);
         trace_sender
             .send(portal::Trace {
-                at: Instant::now(),
+                at: recorded_at,
                 message: "raw trace".into(),
                 failed,
             })
@@ -198,5 +243,19 @@ fn worker_completion_preserves_traces_and_backoff_without_network_requests() {
         assert!((seconds - 1..=seconds).contains(&delay));
         assert!(client.receiver.is_none());
         assert_eq!(client.logs[client.logs.len() - 2].message, "raw trace");
+        assert_eq!(
+            client.logs[client.logs.len() - 2].timestamp_ms,
+            1_700_000_000_000
+        );
     }
+}
+
+#[test]
+fn ordinary_logs_record_wall_clock_time_at_creation() {
+    let mut client = Client::default();
+    let before = timestamp_ms(SystemTime::now());
+    client.log("test log", false);
+    let after = timestamp_ms(SystemTime::now());
+    assert!((before..=after).contains(&client.logs[0].timestamp_ms));
+    assert!(client.logs[0].timestamp_ms > 1_000_000_000_000);
 }

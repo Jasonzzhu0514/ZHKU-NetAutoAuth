@@ -294,7 +294,10 @@ impl App {
         if let Some(receiver) = &self.trace_receiver {
             for trace in receiver.try_iter() {
                 self.logs.push_back(LogEntry {
-                    elapsed: trace.at.saturating_duration_since(self.started_at),
+                    elapsed: self
+                        .started_at
+                        .elapsed()
+                        .saturating_sub(trace.at.elapsed().unwrap_or_default()),
                     message: trace.message,
                     failed: trace.failed,
                 });

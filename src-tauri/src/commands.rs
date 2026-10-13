@@ -167,6 +167,22 @@ pub fn open_release_page(app: AppHandle, state: State<'_, DesktopState>) -> Resu
 }
 
 #[tauri::command]
+pub fn open_authentication_page(
+    app: AppHandle,
+    state: State<'_, DesktopState>,
+) -> Result<(), String> {
+    let url = state
+        .client
+        .lock()
+        .map_err(|_| "网络状态暂不可用")?
+        .authentication_page()
+        .ok_or("请先刷新状态，确定所在区域")?;
+    app.opener()
+        .open_url(url, None::<&str>)
+        .map_err(|_| "无法打开认证页面，请检查默认浏览器".into())
+}
+
+#[tauri::command]
 pub fn frontend_ready() {
     zhku_netautoauth_gui::updater::confirm_startup();
 }

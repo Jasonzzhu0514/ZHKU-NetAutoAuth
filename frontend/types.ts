@@ -14,6 +14,8 @@ export interface Preferences {
 
 export interface ClientState {
   revision: number;
+  lastCheckedMs: number | null;
+  authenticationPage: string | null;
   network: {
     state: 'online' | 'offline' | 'unknown';
     region: string;
@@ -58,7 +60,7 @@ export interface View {
 
 export interface LogEntry {
   id: number;
-  elapsedMs: number;
+  timestampMs: number;
   level: 'INFO' | 'ERROR';
   message: string;
 }

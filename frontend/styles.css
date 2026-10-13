@@ -61,6 +61,15 @@ h4 { font-size: 15px; font-weight: 600; margin: 0 0 10px; }
   border: 1px solid var(--border); border-radius: 8px; box-shadow: none; background: var(--card); }
 .network-card.fui-Card { flex-shrink: 0; padding: 20px; gap: 18px; position: relative; }
 .network-heading { gap: 14px; }
+.network-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
+.network-actions > .fui-Button { width: 122px; min-width: 122px; height: 36px; padding: 0 8px;
+  font-size: 13px; line-height: 20px; font-weight: 400; column-gap: 8px; }
+.network-actions .fui-Button__icon { width: 18px; height: 18px; font-size: 18px; line-height: 18px;
+  margin: 0; display: inline-flex; align-items: center; justify-content: center; }
+.network-actions .fui-Button__icon > svg { width: 18px; height: 18px; }
+.network-actions .fui-Spinner { width: 18px; height: 18px; min-height: 18px; }
+.network-actions .fui-Spinner__spinner { width: 18px; height: 18px; }
+.network-actions .refresh-button.fui-Button { margin-left: 0; }
 .network-title { min-width: 0; }
 .eyebrow { font-size: 13px; line-height: 20px; color: var(--muted); }
 .state-dot { width: 7px; height: 7px; background: #a0a0a0; border-radius: 50%; flex-shrink: 0; }
@@ -99,9 +108,10 @@ h4 { font-size: 15px; font-weight: 600; margin: 0 0 10px; }
 .log-scroll { flex: 1; min-height: 0; overflow: auto; background: var(--inset); border-top: 1px solid var(--divider); scrollbar-gutter: stable; }
 .virtual-log-list { position: relative; width: 100%; }
 .log-row { position: absolute; top: 0; left: 0; width: 100%; padding: 10px 18px;
-  display: grid; grid-template-columns: 62px 42px minmax(0, 1fr); gap: 10px; color: var(--muted); font-size: 12px; line-height: 19px;
+  display: grid; grid-template-columns: 84px 42px minmax(0, 1fr); gap: 10px; color: var(--muted); font-size: 12px; line-height: 19px;
   border-bottom: 1px solid var(--divider); }
 .log-row time, .log-level { font-family: "Cascadia Mono", Consolas, monospace; color: var(--muted); font-size: 11px; }
+.log-row time { display: flex; flex-direction: column; white-space: nowrap; line-height: 16px; }
 .log-row.error, .log-row.error .log-level { color: var(--danger); }
 .log-row.success, .log-row.success .log-level { color: var(--success); }
 .log-message { white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
@@ -139,14 +149,20 @@ h4 { font-size: 15px; font-weight: 600; margin: 0 0 10px; }
   .network-details { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 14px; }
   .network-badge { display: none; }
 }
+@container workspace (max-width: 500px) {
+  .network-heading { flex-wrap: wrap; }
+  .network-title { flex-basis: 100%; }
+  .network-actions { width: 100%; justify-content: flex-end; }
+}
 @media (max-width: 560px) {
   .page-header { gap: 10px; }
   h1 { font-size: 20px; }
   h2 { font-size: 22px; }
   .network-card.fui-Card { padding: 18px; }
   .network-heading { gap: 10px; }
-  .refresh-button.fui-Button { min-width: 104px; padding: 0 8px; }
+  .network-actions > .fui-Button { width: 112px; min-width: 112px; }
+  .network-actions .refresh-button.fui-Button { min-width: 112px; }
   .log-actions .fui-Button { padding: 0 4px; }
   .logs-toolbar { padding: 8px; }
-  .log-row { grid-template-columns: 56px 34px minmax(0, 1fr); padding: 10px 12px; gap: 6px; }
+  .log-row { grid-template-columns: 76px 34px minmax(0, 1fr); padding: 10px 12px; gap: 6px; }
 }

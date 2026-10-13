@@ -58,6 +58,7 @@ fn main() {
             commands::cancel_update,
             commands::install_update,
             commands::open_release_page,
+            commands::open_authentication_page,
             commands::frontend_ready,
             commands::close_window,
         ])

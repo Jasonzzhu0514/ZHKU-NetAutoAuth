@@ -37,6 +37,8 @@ impl From<&portal::Status> for NetworkStatus {
 #[serde(rename_all = "camelCase")]
 pub struct Snapshot {
     pub revision: u64,
+    pub last_checked_ms: Option<u64>,
+    pub authentication_page: Option<String>,
     pub network: NetworkStatus,
     pub busy: bool,
     pub guarding: bool,
@@ -89,7 +91,7 @@ pub struct AccountInput {
 #[serde(rename_all = "camelCase")]
 pub struct LogEntry {
     pub id: u64,
-    pub elapsed_ms: u64,
+    pub timestamp_ms: u64,
     pub level: &'static str,
     pub message: String,
 }

@@ -1,12 +1,34 @@
 import { expect, test } from '@playwright/test';
 import { desktopCalls, mockDesktop } from './desktopMock';
 
+test('打开认证页面期间不显示刷新动画，也不发送状态检查', async ({ page }) => {
+  await mockDesktop(page, 'startup-race', [], true);
+  await page.goto('/');
+  await expect.poll(() => desktopCalls(page)).toContain('ready');
+  const lastCheck = page.locator('.detail-item').filter({ has: page.getByText('最近检查', { exact: true }) }).locator('strong');
+  const before = await lastCheck.textContent();
+  await page.getByRole('button', { name: '认证页面', exact: true }).click();
+  await expect.poll(() => desktopCalls(page)).toContain('open-auth-page');
+  await expect(page.getByRole('button', { name: '认证页面', exact: true })).toBeDisabled();
+  await expect(page.locator('.refresh-button .fui-Spinner')).toHaveCount(0);
+  expect(await desktopCalls(page)).not.toContain('check');
+  await expect(lastCheck).toHaveText(before!);
+  await page.evaluate(() => (window as unknown as { desktopTest: { finishAuthPage: () => void } }).desktopTest.finishAuthPage());
+  await expect(page.getByRole('button', { name: '认证页面', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: '刷新状态', exact: true }).click();
+  await expect.poll(() => desktopCalls(page)).toContain('check');
+});
+
 test('初始化期间收到完成事件，不被旧 busy 快照覆盖', async ({ page }) => {
   await mockDesktop(page, 'startup-race');
   await page.goto('/');
   await expect.poll(() => desktopCalls(page)).toContain('ready');
   await expect(page.getByRole('heading', { name: '已通过认证' })).toBeVisible();
   await expect(page.getByRole('button', { name: '刷新状态' })).toHaveAttribute('aria-disabled', 'false');
+  const lastCheck = page.locator('.detail-item').filter({ has: page.getByText('最近检查', { exact: true }) });
+  await expect(lastCheck.locator('strong')).toHaveText(/^\d{2}:\d{2}:\d{2}$/);
+  await page.getByRole('button', { name: '认证页面', exact: true }).click();
+  await expect.poll(() => desktopCalls(page)).toContain('open-auth-page');
   await page.getByRole('button', { name: '设置', exact: true }).click();
   await expect(page.getByText('检查已完成', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: '主页', exact: true }).click();

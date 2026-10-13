@@ -5,11 +5,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Desktop } from '../useDesktop';
 import type { LogEntry } from '../types';
-
-const time = (ms: number) => {
-  const seconds = Math.floor(ms / 1000);
-  return [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60].map((part) => String(part).padStart(2, '0')).join(':');
-};
+import { logTime } from '../logTime';
 
 export function LogsCard({ desktop, active }: { desktop: Desktop; active: boolean }) {
   const [errorsOnly, setErrorsOnly] = useState(false);
@@ -41,7 +37,7 @@ export function LogsCard({ desktop, active }: { desktop: Desktop; active: boolea
   useEffect(() => { if (active) virtual.measure(); }, [active]);
   useEffect(() => { if (active && tail.current && visible.length) virtual.scrollToIndex(visible.length - 1, { align: 'end' }); }, [active, visible.length]);
   const copy = () => desktop.run(async () => {
-    await navigator.clipboard.writeText(visible.map((log) => `${time(log.elapsedMs)} ${log.level} ${log.message}`).join('\n'));
+    await navigator.clipboard.writeText(visible.map((log) => `${logTime(log.timestampMs).text} ${log.level} ${log.message}`).join('\n'));
   });
   return <Card className="logs-card expanded">
     <div className="logs-toolbar">
@@ -58,10 +54,11 @@ export function LogsCard({ desktop, active }: { desktop: Desktop; active: boolea
         : <div className="virtual-log-list" style={{ height: virtual.getTotalSize() }}>
           {virtual.getVirtualItems().map((row) => {
             const log = visible[row.index];
+            const time = logTime(log.timestampMs);
             const success = log.level === 'INFO' && /^(认证成功|已通过认证)/.test(log.message);
             return <div key={row.key} data-index={row.index} ref={virtual.measureElement}
               className={`log-row ${log.level === 'ERROR' ? 'error' : success ? 'success' : ''}`} style={{ transform: `translateY(${row.start}px)` }}>
-              <time>{time(log.elapsedMs)}</time><span className="log-level">{log.level}</span><span className="log-message">{log.message}</span>
+              <time dateTime={time.iso} title={time.text}><span>{time.date}</span><span>{time.clock}</span></time><span className="log-level">{log.level}</span><span className="log-message">{log.message}</span>
             </div>;
           })}
         </div>}

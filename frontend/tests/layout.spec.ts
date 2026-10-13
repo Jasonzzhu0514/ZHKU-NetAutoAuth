@@ -14,7 +14,14 @@ for (const viewport of [ { width: 1000, height: 768 }, { width: 920, height: 728
     expect(Math.abs(sidebar!.height - panel!.height)).toBeLessThan(1);
     const statusCard = await page.locator('.network-card').boundingBox();
     const refresh = await page.getByRole('button', { name: '刷新状态' }).boundingBox();
+    const auth = await page.getByRole('button', { name: '认证页面', exact: true }).boundingBox();
+    expect(auth!.x + auth!.width).toBeLessThan(refresh!.x);
+    expect(Math.abs(auth!.y - refresh!.y)).toBeLessThan(1);
+    expect(Math.abs(auth!.width - refresh!.width)).toBeLessThan(1);
+    expect(Math.abs(auth!.height - refresh!.height)).toBeLessThan(1);
     expect(refresh!.x + refresh!.width).toBeGreaterThan(statusCard!.x + statusCard!.width - 45);
+    await expect(page.getByText('最近检查', { exact: true })).toBeVisible();
+    await expect(page.getByText('VLAN', { exact: true })).toHaveCount(0);
     const boxes = await page.locator('.configuration-grid > .fui-Card').evaluateAll((cards) => cards.map((card) => {
       const r = card.getBoundingClientRect(); return { x: r.x, y: r.y, right: r.right, bottom: r.bottom, height: r.height };
     }));

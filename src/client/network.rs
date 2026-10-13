@@ -73,10 +73,7 @@ impl Client {
             for trace in traces {
                 self.logs.push(LogEntry {
                     id: self.next_log_id,
-                    elapsed_ms: trace
-                        .at
-                        .saturating_duration_since(self.started_at)
-                        .as_millis() as u64,
+                    timestamp_ms: timestamp_ms(trace.at),
                     level: if trace.failed { "ERROR" } else { "INFO" },
                     message: trace.message,
                 });
@@ -87,6 +84,7 @@ impl Client {
         match received {
             Some(Ok(event)) => {
                 self.receiver = None;
+                self.last_checked_ms = Some(timestamp_ms(SystemTime::now()));
                 self.status = event.status;
                 self.failures = if event.failed {
                     (self.failures + 1).min(5)

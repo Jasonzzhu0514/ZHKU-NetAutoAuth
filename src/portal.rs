@@ -9,8 +9,9 @@ use std::{
 use zeroize::Zeroizing;
 
 // Campus server defaults; no personal device or account data.
-const OFFICE: &str = "http://10.255.255.254";
-const DORMITORY: &str = "http://192.16.99.5";
+pub const OFFICE: &str = "http://10.255.255.254";
+pub const DORMITORY: &str = "http://192.16.99.5";
+pub const OFFICE_PAGE: &str = "/a79.htm";
 
 pub struct Credentials {
     pub username: String,
@@ -58,7 +59,7 @@ pub struct Portal {
 }
 
 pub struct Trace {
-    pub at: Instant,
+    pub at: SystemTime,
     pub message: String,
     pub failed: bool,
 }
@@ -89,7 +90,7 @@ impl Portal {
         if let Some(sink) = &self.trace_sink {
             let message = redact(&message.into(), &self.secrets.borrow());
             let _ = sink.send(Trace {
-                at: Instant::now(),
+                at: SystemTime::now(),
                 message,
                 failed,
             });
@@ -160,7 +161,7 @@ impl Portal {
         let response = self
             .client
             .get(format!("{origin}{path}"))
-            .header("Referer", format!("{OFFICE}/a79.htm"))
+            .header("Referer", format!("{OFFICE}{OFFICE_PAGE}"))
             .header("Cache-Control", "no-cache")
             .query(query)
             .send()
@@ -321,7 +322,7 @@ impl Portal {
             State::Unknown => return Err(current.detail),
             State::Offline => {}
         }
-        let page = self.request(OFFICE, "/a79.htm", &[])?;
+        let page = self.request(OFFICE, OFFICE_PAGE, &[])?;
         let pattern =
             regex::Regex::new(r#"vlanid\s*=\s*['"]([^'"]*)"#).map_err(|_| "无法解析页面配置")?;
         let vlan = pattern

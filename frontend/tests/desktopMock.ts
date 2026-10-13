@@ -1,17 +1,21 @@
 import type { Page } from '@playwright/test';
-import type { UpdateState } from '../types';
+import type { LogEntry, UpdateState } from '../types';
 
-export async function mockDesktop(page: Page, mode: 'startup-race' | 'save-failure') {
-  await page.addInitScript(({ mode }) => {
+export async function mockDesktop(page: Page, mode: 'startup-race' | 'save-failure', logs: LogEntry[] = [], holdAuthPage = false) {
+  await page.addInitScript(({ mode, logs, holdAuthPage }) => {
     const callbacks = new Map<number, (event: unknown) => void>();
     const listeners = new Map<string, number[]>();
     let next = 1;
     const calls: string[] = [];
+    const clipboard: string[] = [];
+    Object.defineProperty(navigator, 'clipboard', { configurable: true,
+      value: { writeText: async (text: string) => { clipboard.push(text); } } });
     let lateSnapshotUsed = false;
     const account = { username: '', password: '', rememberPassword: false, autoLogin: false };
     let client = {
       revision: 1, busy: mode === 'startup-race', guarding: false, username: '', savedUsername: null,
-      rememberPassword: false, autoLogin: false, hasPassword: false, logGeneration: 0, logCount: 0,
+      lastCheckedMs: null as number | null, authenticationPage: 'http://10.255.255.254/a79.htm',
+      rememberPassword: false, autoLogin: false, hasPassword: false, logGeneration: 0, logCount: logs.length,
       network: { state: 'online', region: '测试区域', ip: '192.0.2.1', account: '', mac: '', cvid: '', pvid: '', detail: '' },
       preferences: { closeBehavior: 'exit', noticeAcknowledged: true, autoCheckUpdates: false, guardIntervalSeconds: 30 },
     };
@@ -25,7 +29,7 @@ export async function mockDesktop(page: Page, mode: 'startup-race' | 'save-failu
     const snapshot = () => structuredClone({ client, updater, trayReady: true });
     Object.assign(window, {
       isTauri: true,
-      desktopTest: { calls },
+      desktopTest: { calls, clipboard, finishAuthPage: () => {} },
       __TAURI_EVENT_PLUGIN_INTERNALS__: { unregisterListener: () => {} },
       __TAURI_INTERNALS__: {
         metadata: { currentWindow: { label: 'main' }, currentWebview: { label: 'main' } },
@@ -49,7 +53,7 @@ export async function mockDesktop(page: Page, mode: 'startup-race' | 'save-failu
           }
           if (command === 'credentials') {
             if (mode === 'startup-race') {
-              client = { ...client, revision: 2, busy: false };
+              client = { ...client, revision: 2, busy: false, lastCheckedMs: Date.now() };
               updater = { ...updater, revision: 2, message: '检查已完成' };
               emit('client-state', client);
               emit('updates-state', updater);
@@ -87,12 +91,19 @@ export async function mockDesktop(page: Page, mode: 'startup-race' | 'save-failu
           if (command === 'close_window') { calls.push('close'); return; }
           if (command === 'frontend_ready') { calls.push('ready'); return; }
           if (command === 'install_update') { calls.push('install'); return; }
-          if (command === 'get_logs') return [];
+          if (command === 'open_authentication_page') {
+            calls.push('open-auth-page');
+            if (holdAuthPage) await new Promise<void>((resolve) => {
+              (window as unknown as { desktopTest: { finishAuthPage: () => void } }).desktopTest.finishAuthPage = resolve;
+            });
+            return;
+          }
+          if (command === 'get_logs') return logs.filter((log) => log.id > args.after).slice(0, 256);
           return;
         },
       },
     });
-  }, { mode });
+  }, { mode, logs, holdAuthPage });
 }
 
 export async function desktopCalls(page: Page) {

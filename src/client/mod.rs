@@ -8,7 +8,7 @@ use crate::{portal, preferences, storage};
 pub use model::{AccountInput, DesktopPreferences, LogEntry, Snapshot};
 use std::{
     sync::mpsc,
-    time::{Duration, Instant},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 #[derive(Clone, Copy)]
@@ -39,9 +39,9 @@ pub struct Client {
     logs: Vec<LogEntry>,
     next_log_id: u64,
     log_generation: u64,
-    started_at: Instant,
     changed: bool,
     revision: u64,
+    last_checked_ms: Option<u64>,
 }
 
 impl Default for Client {
@@ -60,9 +60,9 @@ impl Default for Client {
             logs: Vec::new(),
             next_log_id: 1,
             log_generation: 0,
-            started_at: Instant::now(),
             changed: true,
             revision: 0,
+            last_checked_ms: None,
         }
     }
 }
@@ -95,6 +95,8 @@ impl Client {
     pub fn snapshot(&self) -> Snapshot {
         Snapshot {
             revision: self.revision,
+            last_checked_ms: self.last_checked_ms,
+            authentication_page: self.authentication_page(),
             network: (&self.status).into(),
             busy: self.receiver.is_some(),
             guarding: self.guard,
@@ -120,6 +122,14 @@ impl Client {
 
     pub fn online(&self) -> bool {
         self.status.state == portal::State::Online
+    }
+
+    pub fn authentication_page(&self) -> Option<String> {
+        match self.status.region {
+            "办公区" => Some(format!("{}{}", portal::OFFICE, portal::OFFICE_PAGE)),
+            "宿舍区" => Some(portal::DORMITORY.to_owned()),
+            _ => None,
+        }
     }
 
     pub fn resume_guard_after_update(&self) -> bool {
@@ -184,7 +194,7 @@ impl Client {
     fn log(&mut self, message: impl Into<String>, failed: bool) {
         self.logs.push(LogEntry {
             id: self.next_log_id,
-            elapsed_ms: self.started_at.elapsed().as_millis() as u64,
+            timestamp_ms: timestamp_ms(SystemTime::now()),
             level: if failed { "ERROR" } else { "INFO" },
             message: message.into(),
         });
@@ -195,4 +205,10 @@ impl Client {
     fn configured(&self) -> bool {
         !self.settings.username.trim().is_empty() && !self.settings.password.is_empty()
     }
+}
+
+fn timestamp_ms(at: SystemTime) -> u64 {
+    at.duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis() as u64
 }
