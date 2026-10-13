@@ -92,10 +92,11 @@ v2.0.x 没有内置更新功能，需要手动安装或下载一次 v2.1.0，之
 
 ## 开发
 
-源码使用 Rust 和 egui。安装 Rust stable 与 MSVC 构建工具后，在仓库根目录执行：
+当前 UI 开发分支使用 **Tauri 2 + React + TypeScript + Fluent UI**，认证、凭据加密和自动守护继续由 Rust 实现。Windows 开发需要 Node.js 22+、Rust stable、MSVC 构建工具及 WebView2 运行时。在仓库根目录执行：
 
 ```powershell
-cargo run --locked
+npm ci
+npm run desktop
 ```
 
 验证代码：
@@ -104,9 +105,15 @@ cargo run --locked
 cargo fmt --check
 cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked
+npm run check
+npm run test:ui
+cargo fmt --manifest-path src-tauri/Cargo.toml --check
+cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings
 ```
 
-Windows 发布构建由 CI 执行。本地构建需安装 NSIS，并执行 `./scripts/build.ps1`，或通过 `-NsisCompiler` 指定编译器路径。发布 tag 必须与 `Cargo.toml` 中的版本一致，例如 `v2.1.0`。Release 提供安装包和便携版两个 exe，不额外打包 ZIP。
+`npm run desktop:build` 构建 Tauri 客户端。前端源代码位于 `frontend/`，桌面接口与托盘位于 `src-tauri/`，共用 Rust 核心位于 `src/`。账号仍使用原有 DPAPI 凭据文件，前端不使用浏览器本地存储保存密码。
+
+v2.1.0 的 egui 客户端及 Release 流水线保留为迁移基线，可以通过 `cargo run --locked` 启动。当前 UI 分支尚未切换正式发布流程，待新界面验收后再调整。Release 提供安装包和便携版两个 exe，不额外打包 ZIP。
 
 ## 历史版本
 

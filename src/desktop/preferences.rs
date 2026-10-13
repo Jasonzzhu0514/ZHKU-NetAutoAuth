@@ -4,7 +4,7 @@ use std::{
 };
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub(super) enum CloseBehavior {
+pub enum CloseBehavior {
     #[default]
     Tray,
     Exit,

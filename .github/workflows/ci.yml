@@ -1,4 +1,4 @@
-name: Rust checks
+name: Desktop checks
 
 on:
   push:
@@ -17,9 +17,29 @@ jobs:
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            . -> target
+            src-tauri -> target
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Build and test frontend
+        run: npm run test:ui
       - name: Check formatting
         run: cargo fmt --check
       - name: Check Rust code
         run: cargo clippy --locked --all-targets -- -D warnings
       - name: Run tests
         run: cargo test --locked
+      - name: Check Tauri formatting
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml --all --check
+      - name: Check Tauri code
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings
+      - name: Test shared core with Tauri dependencies
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked -p zhku-netautoauth-gui --lib
+      - name: Build Tauri client
+        run: cargo build --manifest-path src-tauri/Cargo.toml --locked --features custom-protocol

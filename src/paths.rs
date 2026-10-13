@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 /// Shared application directory; credential and desktop settings stay separate.
-pub(crate) fn app_data() -> Result<PathBuf, String> {
+pub fn app_data() -> Result<PathBuf, String> {
     std::env::var_os("LOCALAPPDATA")
         .filter(|value| !value.is_empty())
         .map(|value| {
