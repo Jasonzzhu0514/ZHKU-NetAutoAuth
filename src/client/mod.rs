@@ -140,6 +140,15 @@ impl Client {
     }
 
     pub fn set_preferences(&mut self, input: DesktopPreferences) -> Result<(), String> {
+        let path = crate::paths::app_data()?.join("desktop.json");
+        self.set_preferences_at(input, &path)
+    }
+
+    fn set_preferences_at(
+        &mut self,
+        input: DesktopPreferences,
+        path: &std::path::Path,
+    ) -> Result<(), String> {
         let next = preferences::Preferences {
             close: match input.close_behavior.as_str() {
                 "tray" => preferences::CloseBehavior::Tray,
@@ -148,9 +157,14 @@ impl Client {
             },
             notice_acknowledged: input.notice_acknowledged,
             auto_check_updates: input.auto_check_updates,
+            guard_interval_seconds: input.guard_interval_seconds,
         };
-        let path = crate::paths::app_data()?.join("desktop.json");
-        next.save(&path)?;
+        next.save(path)?;
+        if next.guard_interval_seconds != self.preferences.guard_interval_seconds {
+            self.next_check =
+                Instant::now() + Duration::from_secs(next.guard_delay_seconds(self.failures));
+            self.guard_pending = false;
+        }
         self.preferences = next;
         self.mark_changed();
         Ok(())

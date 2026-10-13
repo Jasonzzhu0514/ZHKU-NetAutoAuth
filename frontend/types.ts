@@ -9,6 +9,7 @@ export interface Preferences {
   closeBehavior: 'tray' | 'exit';
   noticeAcknowledged: boolean;
   autoCheckUpdates: boolean;
+  guardIntervalSeconds: number;
 }
 
 export interface ClientState {

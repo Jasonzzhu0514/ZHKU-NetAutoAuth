@@ -76,6 +76,10 @@ impl Desktop {
     pub fn auto_check_updates(&self) -> bool {
         self.preferences.auto_check_updates
     }
+
+    pub fn guard_delay_seconds(&self, failures: u32) -> u64 {
+        self.preferences.guard_delay_seconds(failures)
+    }
     pub fn exit(&mut self, ctx: &egui::Context) {
         self.command(Command::Exit, ctx);
     }

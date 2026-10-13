@@ -3,6 +3,7 @@ import { Button, Card, Checkbox, Dialog, DialogActions, DialogBody, DialogConten
 import { ArrowDownloadRegular, ArrowSyncRegular, OpenRegular } from '@fluentui/react-icons';
 import { useState } from 'react';
 import type { Desktop } from '../useDesktop';
+import { GuardIntervalSetting } from './GuardIntervalSetting';
 
 export function SettingsPage({ desktop }: { desktop: Desktop }) {
   const [confirm, setConfirm] = useState(false);
@@ -15,6 +16,8 @@ export function SettingsPage({ desktop }: { desktop: Desktop }) {
             <Radio value="tray" label="驻留系统托盘，继续运行" disabled={!desktop.view?.trayReady} />
             <Radio value="exit" label="退出程序，停止守护" />
           </RadioGroup></section>
+          <Divider />
+          <GuardIntervalSetting desktop={desktop} />
           <Divider />
           <section className="updates-section"><div className="section-heading"><h4>软件更新</h4><span className="version-tag">v{update?.version || '—'} · {update?.edition || '—'}</span></div>
             <Checkbox label="认证联网后自动检查更新" checked={preferences?.autoCheckUpdates || false}

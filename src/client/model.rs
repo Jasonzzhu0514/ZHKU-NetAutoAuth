@@ -56,6 +56,7 @@ pub struct DesktopPreferences {
     pub close_behavior: String,
     pub notice_acknowledged: bool,
     pub auto_check_updates: bool,
+    pub guard_interval_seconds: u64,
 }
 
 impl From<&preferences::Preferences> for DesktopPreferences {
@@ -69,6 +70,7 @@ impl From<&preferences::Preferences> for DesktopPreferences {
             .into(),
             notice_acknowledged: value.notice_acknowledged,
             auto_check_updates: value.auto_check_updates,
+            guard_interval_seconds: value.guard_interval_seconds,
         }
     }
 }

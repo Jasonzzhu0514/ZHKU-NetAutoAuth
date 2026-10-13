@@ -13,7 +13,7 @@ export async function mockDesktop(page: Page, mode: 'startup-race' | 'save-failu
       revision: 1, busy: mode === 'startup-race', guarding: false, username: '', savedUsername: null,
       rememberPassword: false, autoLogin: false, hasPassword: false, logGeneration: 0, logCount: 0,
       network: { state: 'online', region: '测试区域', ip: '192.0.2.1', account: '', mac: '', cvid: '', pvid: '', detail: '' },
-      preferences: { closeBehavior: 'exit', noticeAcknowledged: true, autoCheckUpdates: false },
+      preferences: { closeBehavior: 'exit', noticeAcknowledged: true, autoCheckUpdates: false, guardIntervalSeconds: 30 },
     };
     let updater: UpdateState = { revision: 1, version: '2.1.0', edition: '便携版', message: '尚未检查更新',
       failed: false, rollback: false, busy: false, downloading: false, bytes: 0, prepared: false, release: null };
@@ -64,6 +64,12 @@ export async function mockDesktop(page: Page, mode: 'startup-race' | 'save-failu
             return '模拟：凭据目录不可写';
           }
           if (command === 'persist_account') throw new Error('模拟：凭据目录不可写');
+          if (command === 'save_preferences') {
+            client = { ...client, revision: client.revision + 1, preferences: args.preferences };
+            calls.push(`interval:${args.preferences.guardIntervalSeconds}`);
+            emit('client-state', client);
+            return;
+          }
           if (command === 'network_action') {
             calls.push(args.action);
             client = { ...client, revision: client.revision + 1, busy: mode === 'startup-race',

@@ -93,7 +93,7 @@ impl Client {
                 } else {
                     0
                 };
-                let delay = (30 * 2u64.pow(self.failures)).min(300);
+                let delay = self.preferences.guard_delay_seconds(self.failures);
                 self.next_check = Instant::now()
                     + if self.guard_pending {
                         Duration::ZERO

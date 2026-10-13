@@ -73,6 +73,51 @@ fn snapshots_advance_revision_on_busy_guard_and_log_changes() {
 }
 
 #[test]
+fn interval_change_persists_and_reschedules_without_interrupting_request() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("desktop.json");
+    let mut client = configured();
+    let (sender, receiver) = mpsc::channel();
+    client.receiver = Some(receiver);
+    client.guard = true;
+    client.guard_pending = true;
+    let mut input = client.snapshot().preferences;
+    input.guard_interval_seconds = 90;
+    client.set_preferences_at(input, &path).unwrap();
+    assert_eq!(
+        preferences::Preferences::load(&path)
+            .unwrap()
+            .guard_interval_seconds,
+        90
+    );
+    assert!(client.receiver.is_some());
+    assert!(!client.guard_pending);
+    let delay = client
+        .next_check
+        .saturating_duration_since(Instant::now())
+        .as_secs();
+    assert!((89..=90).contains(&delay));
+    sender
+        .send(NetworkEvent {
+            status: portal::Status {
+                state: portal::State::Online,
+                ..portal::Status::unknown("测试区域", "")
+            },
+            message: "已通过认证".into(),
+            failed: false,
+        })
+        .unwrap();
+    client.tick();
+    assert!(client.receiver.is_none());
+    assert!(client.guard);
+    let delay = client
+        .next_check
+        .saturating_duration_since(Instant::now())
+        .as_secs();
+    assert!((89..=90).contains(&delay));
+}
+
+#[test]
 fn locked_accounts_cannot_delete_or_replace_saved_credentials() {
     let mut client = configured();
     client.guard = true;
