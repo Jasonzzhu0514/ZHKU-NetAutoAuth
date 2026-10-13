@@ -24,6 +24,14 @@ jobs:
           components: rustfmt, clippy
           targets: x86_64-pc-windows-msvc
       - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            . -> target
+            src-tauri -> target
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
       - name: Install NSIS
         shell: pwsh
         run: |
