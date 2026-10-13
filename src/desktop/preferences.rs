@@ -10,10 +10,20 @@ pub(super) enum CloseBehavior {
     Exit,
 }
 
-#[derive(Default)]
 pub(super) struct Preferences {
     pub close: CloseBehavior,
     pub notice_acknowledged: bool,
+    pub auto_check_updates: bool,
+}
+
+impl Default for Preferences {
+    fn default() -> Self {
+        Self {
+            close: CloseBehavior::Tray,
+            notice_acknowledged: false,
+            auto_check_updates: true,
+        }
+    }
 }
 
 impl Preferences {
@@ -43,6 +53,7 @@ impl Preferences {
                 CloseBehavior::Tray
             },
             notice_acknowledged: value["notice_acknowledged"].as_bool().unwrap_or(false),
+            auto_check_updates: value["auto_check_updates"].as_bool().unwrap_or(true),
         })
     }
 
@@ -53,6 +64,7 @@ impl Preferences {
         let data = serde_json::json!({
             "close_behavior": if self.close == CloseBehavior::Tray { "tray" } else { "exit" },
             "notice_acknowledged": self.notice_acknowledged,
+            "auto_check_updates": self.auto_check_updates,
         });
         let mut temporary =
             tempfile::NamedTempFile::new_in(parent).map_err(|_| "无法创建窗口行为设置文件")?;
@@ -78,15 +90,33 @@ mod tests {
         let mut settings = Preferences::load(&file).unwrap();
         assert_eq!(settings.close, CloseBehavior::Tray);
         assert!(!settings.notice_acknowledged);
+        assert!(settings.auto_check_updates);
         settings.close = CloseBehavior::Exit;
         settings.notice_acknowledged = true;
+        settings.auto_check_updates = false;
         settings.save(&file).unwrap();
         let loaded = Preferences::load(&file).unwrap();
         assert_eq!(loaded.close, CloseBehavior::Exit);
         assert!(loaded.notice_acknowledged);
+        assert!(!loaded.auto_check_updates);
         let json: serde_json::Value =
             serde_json::from_slice(&std::fs::read(file).unwrap()).unwrap();
-        assert_eq!(json.as_object().unwrap().len(), 2);
+        assert_eq!(json.as_object().unwrap().len(), 3);
+    }
+
+    #[test]
+    fn legacy_preferences_keep_existing_choices_and_enable_update_checks() {
+        let dir = tempfile::tempdir().unwrap();
+        let file = dir.path().join("desktop.json");
+        std::fs::write(
+            &file,
+            br#"{"close_behavior":"exit","notice_acknowledged":true}"#,
+        )
+        .unwrap();
+        let loaded = Preferences::load(&file).unwrap();
+        assert_eq!(loaded.close, CloseBehavior::Exit);
+        assert!(loaded.notice_acknowledged);
+        assert!(loaded.auto_check_updates);
     }
 
     #[test]

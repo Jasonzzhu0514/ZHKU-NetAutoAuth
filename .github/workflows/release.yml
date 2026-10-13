@@ -24,6 +24,12 @@ jobs:
           components: rustfmt, clippy
           targets: x86_64-pc-windows-msvc
       - uses: Swatinem/rust-cache@v2
+      - name: Install NSIS
+        shell: pwsh
+        run: |
+          choco install nsis --yes --no-progress
+          if ($LASTEXITCODE -ne 0) { throw 'NSIS installation failed.' }
+          (Join-Path ${env:ProgramFiles(x86)} 'NSIS') | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Test and build desktop executable
         shell: pwsh
         env:
@@ -32,7 +38,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Windows-x64
-          path: dist/ZHKU-NetAutoAuth.exe
+          path: |
+            dist/ZHKU-NetAutoAuth.exe
+            dist/ZHKU-NetAutoAuth-Setup.exe
           if-no-files-found: error
       - name: Publish GitHub release
         if: startsWith(github.ref, 'refs/tags/')
@@ -42,5 +50,5 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          & gh release create $env:RELEASE_TAG ./dist/ZHKU-NetAutoAuth.exe --verify-tag --title "ZHKU-NetAutoAuth $env:RELEASE_TAG" --generate-notes
+          & gh release create $env:RELEASE_TAG ./dist/ZHKU-NetAutoAuth-Setup.exe ./dist/ZHKU-NetAutoAuth.exe --verify-tag --title "ZHKU-NetAutoAuth $env:RELEASE_TAG" --generate-notes
           if ($LASTEXITCODE -ne 0) { throw 'GitHub release publication failed.' }

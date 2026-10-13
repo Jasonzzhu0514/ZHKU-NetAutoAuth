@@ -36,7 +36,12 @@ impl App {
                             ui.with_layout(
                                 egui::Layout::right_to_left(egui::Align::Center),
                                 |ui| {
-                                    if ui.add(egui::Button::new("设置").frame(false)).clicked() {
+                                    let settings = if self.updater.has_update() {
+                                        "设置 · 有更新"
+                                    } else {
+                                        "设置"
+                                    };
+                                    if ui.add(egui::Button::new(settings).frame(false)).clicked() {
                                         self.desktop.open_settings();
                                     }
                                 },

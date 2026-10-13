@@ -11,7 +11,10 @@
 
 ## 下载与使用
 
-Windows 桌面版对应 **v2.x**。在 [Releases](https://github.com/Jasonzzhu0514/ZHKU-NetAutoAuth/releases) 中选择桌面版本，下载 **ZHKU-NetAutoAuth.exe**，双击即可运行，无需安装 Python 或 Rust。
+Windows 桌面版对应 **v2.x**。在 [Releases](https://github.com/Jasonzzhu0514/ZHKU-NetAutoAuth/releases) 中选择桌面版本，无需安装 Python 或 Rust。
+
+- **安装版（推荐，从 v2.1.0 开始提供）**：下载 `ZHKU-NetAutoAuth-Setup.exe`，按提示安装。默认为当前用户安装，提供开始菜单和卸载入口。
+- **便携版**：下载 `ZHKU-NetAutoAuth.exe`，双击运行。
 
 历史 **v1.x** 是命令行版本。如果 Releases 尚无 v2.x，可以按文末的开发说明从源码启动桌面版。GitHub 的“Download ZIP”下载的是源码，普通用户请使用 Release 中的 exe 附件。
 
@@ -35,7 +38,8 @@ Windows 桌面版对应 **v2.x**。在 [Releases](https://github.com/Jasonzzhu05
 | 注销连接 | 停止守护，并注销当前校园网连接 |
 | 自动守护 | 保持运行，认证掉线后自动重新认证 |
 | 运行日志 | 展开诊断信息，支持仅看异常、复制和清空 |
-| 设置 | 修改关闭窗口时的行为 |
+| 设置 | 修改关闭窗口时的行为，管理软件更新 |
+| 软件更新 | 检查新版本、查看更新说明，确认后下载并安装 |
 
 ## 账号与自动登录
 
@@ -53,6 +57,18 @@ Windows 桌面版对应 **v2.x**。在 [Releases](https://github.com/Jasonzzhu05
 托盘右键菜单显示网络和守护状态。「退出程序」会结束客户端、停止守护，不会主动注销校园网连接。需要直接关闭程序时，也可以在右上角「设置」中选择关闭窗口时退出。托盘不可用时，关闭窗口直接退出。
 
 当前未提供开机启动。
+
+## 软件更新
+
+在右上角「设置 → 软件更新」中点击「检查更新」。也可启用「认证联网后自动检查更新」；发现新版本时会提示，不会自动下载或安装。
+
+点击「下载更新」可查看进度，下载完成并校验通过后，点击「安装并重启」确认升级。安装版使用安装包升级，便携版替换原程序文件；更新会保留现有配置，不会注销校园网连接。
+
+升级期间客户端会短暂退出。已记住密码时，正在运行的守护会在重启后恢复；未记住的密码需要重新输入。新版程序无法启动时，更新助手会尝试恢复旧程序。
+
+更新包来自本仓库的 GitHub Releases，经过 SHA-256 完整性校验。网络受限、缺少校验信息或程序目录不可写时，可打开发布页面手动下载。安装包暂未配置 Windows 代码签名。
+
+v2.0.x 没有内置更新功能，需要手动安装或下载一次 v2.1.0，之后才能使用软件内更新。卸载安装版会保留账号和窗口设置；需要清除凭据时，请先在客户端删除保存的账号。
 
 ## 隐私
 
@@ -90,7 +106,7 @@ cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked
 ```
 
-Windows 发布构建由 CI 执行，也可使用 `./scripts/build.ps1` 在本地构建。发布 tag 必须与 `Cargo.toml` 中的版本一致，例如 `v2.0.1`。Release 直接提供 exe，不额外打包 ZIP。
+Windows 发布构建由 CI 执行。本地构建需安装 NSIS，并执行 `./scripts/build.ps1`，或通过 `-NsisCompiler` 指定编译器路径。发布 tag 必须与 `Cargo.toml` 中的版本一致，例如 `v2.1.0`。Release 提供安装包和便携版两个 exe，不额外打包 ZIP。
 
 ## 历史版本
 

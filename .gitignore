@@ -14,3 +14,4 @@ dist/
 target/
 *.pdb
 desktop.json
+.zhku-update-*/
