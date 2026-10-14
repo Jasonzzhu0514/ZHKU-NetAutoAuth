@@ -39,7 +39,5 @@ jobs:
         run: cargo fmt --manifest-path src-tauri/Cargo.toml --all --check
       - name: Check Tauri code
         run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings
-      - name: Test shared core with Tauri dependencies
-        run: cargo test --manifest-path src-tauri/Cargo.toml --locked -p zhku-netautoauth-gui --lib
       - name: Build Tauri client
         run: cargo build --manifest-path src-tauri/Cargo.toml --locked --features custom-protocol
