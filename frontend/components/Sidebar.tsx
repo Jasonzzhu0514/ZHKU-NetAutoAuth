@@ -1,7 +1,7 @@
 import { Badge, Button, Tooltip } from '@fluentui/react-components';
-import { DocumentTextRegular, HomeRegular, SettingsRegular } from '@fluentui/react-icons';
+import { DocumentTextRegular, GlobeRegular, HomeRegular, SettingsRegular } from '@fluentui/react-icons';
 
-export type Page = 'home' | 'logs' | 'settings';
+export type Page = 'home' | 'logs' | 'network-tests' | 'settings';
 
 export function Sidebar({ page, onNavigate, hasUpdate }: {
   page: Page; onNavigate: (page: Page) => void; hasUpdate: boolean;
@@ -16,7 +16,7 @@ export function Sidebar({ page, onNavigate, hasUpdate }: {
       </Button>
     </Tooltip>;
   return <nav className="sidebar" aria-label="主导航">
-    <div className="sidebar-links">{item('home', '主页', <HomeRegular />)}{item('logs', '运行日志', <DocumentTextRegular />)}</div>
+    <div className="sidebar-links">{item('home', '主页', <HomeRegular />)}{item('network-tests', '网络测试', <GlobeRegular />)}{item('logs', '运行日志', <DocumentTextRegular />)}</div>
     <div className="sidebar-footer">{item('settings', '设置', <SettingsRegular />)}</div>
   </nav>;
 }

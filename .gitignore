@@ -14,6 +14,7 @@ dist/
 target/
 *.pdb
 desktop.json
+network-tests.json
 .zhku-update-*/
 node_modules/
 web-dist/

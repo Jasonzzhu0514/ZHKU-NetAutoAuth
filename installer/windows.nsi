@@ -132,6 +132,7 @@ Section "Uninstall"
       !insertmacro DeleteUserFile "$LOCALAPPDATA\ZHKU-NetAutoAuth\credentials.dat"
       !insertmacro DeleteUserFile "$LOCALAPPDATA\ZHKU-NetAutoAuth\credentials.tmp"
       !insertmacro DeleteUserFile "$LOCALAPPDATA\ZHKU-NetAutoAuth\desktop.json"
+      !insertmacro DeleteUserFile "$LOCALAPPDATA\ZHKU-NetAutoAuth\network-tests.json"
     ${EndIf}
     ${If} ${Errors}
       IfSilent +2

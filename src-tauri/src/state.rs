@@ -9,6 +9,7 @@ use zhku_netautoauth_gui::{client::Client, updater::Service};
 pub struct DesktopState {
     pub client: Mutex<Client>,
     pub updater: Mutex<Service>,
+    pub network_tests: Mutex<zhku_netautoauth_gui::network_tests::Service>,
     pub running: AtomicBool,
     pub exiting: AtomicBool,
     pub tray_ready: AtomicBool,
@@ -28,9 +29,12 @@ impl DesktopState {
         client.initialize(zhku_netautoauth_gui::updater::resume_requested());
         let mut updater = Service::default();
         updater.initialize();
+        let mut network_tests = zhku_netautoauth_gui::network_tests::Service::default();
+        network_tests.initialize();
         Self {
             client: Mutex::new(client),
             updater: Mutex::new(updater),
+            network_tests: Mutex::new(network_tests),
             running: AtomicBool::new(true),
             exiting: AtomicBool::new(false),
             tray_ready: AtomicBool::new(false),
@@ -104,6 +108,11 @@ pub fn start_worker(app: AppHandle) {
                 if updater.poll() {
                     let _ = app.emit("updates-state", updater.snapshot());
                 }
+            }
+            if let Ok(mut tests) = state.network_tests.lock()
+                && tests.poll()
+            {
+                let _ = app.emit("network-test-state", tests.snapshot());
             }
             std::thread::sleep(std::time::Duration::from_millis(100));
         }

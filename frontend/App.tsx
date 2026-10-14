@@ -9,6 +9,7 @@ import { LogsCard } from './components/LogsCard';
 import { FirstUseDialog, SettingsPage } from './components/SettingsPage';
 import { TitleBar } from './components/TitleBar';
 import { Sidebar, type Page } from './components/Sidebar';
+import { NetworkTestsPage } from './components/NetworkTestsPage';
 
 export function App() {
   const desktop = useDesktop();
@@ -22,7 +23,7 @@ export function App() {
   return <div className="desktop-frame"><TitleBar desktop={desktop} />
     <div className="workspace"><Sidebar page={page} onNavigate={setPage} hasUpdate={!!release} /><main className={`app-shell page-${page}`}>
     {page !== 'home' && <header className="page-header">
-      <h1>{page === 'logs' ? '运行日志' : '设置'}</h1>
+      <h1>{page === 'logs' ? '运行日志' : page === 'network-tests' ? '网络测试' : '设置'}</h1>
     </header>}
     {(desktop.error || desktop.persistenceWarning) && <MessageBar intent={desktop.error ? 'error' : 'warning'}><MessageBarBody>{desktop.error || desktop.persistenceWarning}</MessageBarBody><MessageBarActions>
       <Button appearance="transparent" icon={<DismissRegular />} aria-label="关闭提示" onClick={() => {
@@ -34,6 +35,7 @@ export function App() {
       <div className="configuration-grid"><ControlsCard desktop={desktop} /><AccountCard desktop={desktop} /></div>
     </section>
     <section className="page-panel logs-panel" hidden={page !== 'logs'}><LogsCard desktop={desktop} active={page === 'logs'} /></section>
+    <section className="page-panel network-tests-panel" hidden={page !== 'network-tests'}><NetworkTestsPage active={page === 'network-tests'} /></section>
     <section className="page-panel settings-panel" hidden={page !== 'settings'}><SettingsPage desktop={desktop} /></section>
     <FirstUseDialog desktop={desktop} />
   </main></div></div>;

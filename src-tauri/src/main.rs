@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 
 mod commands;
+mod network_tests;
 mod state;
 mod tray;
 
@@ -43,6 +44,8 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::snapshot,
+            network_tests::network_tests_snapshot,
+            network_tests::network_tests_action,
             commands::credentials,
             commands::save_account,
             commands::persist_account,

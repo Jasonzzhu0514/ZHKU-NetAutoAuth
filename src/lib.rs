@@ -1,4 +1,5 @@
 pub mod client;
+pub mod network_tests;
 pub mod paths;
 pub mod portal;
 mod portal_format;
